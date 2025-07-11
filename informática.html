@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Blog de Desarrollo de Software</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter para texto general, Oxanium para títulos, Fira Code para código/logo -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Oxanium:wght@400;600;700;800&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Custom styles not covered by Tailwind or for specific overrides */
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+            background: linear-gradient(to bottom right, #0A0A0A, #1A1A1A); /* Deep dark background gradient */
+        }
+        .font-oxanium {
+            font-family: 'Oxanium', sans-serif;
+        }
+        .font-fira-code {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Custom message box styling (Neon effect) */
+        .message-box {
+            position: fixed;
+            top: 1.5rem; /* 24px */
+            left: 50%;
+            transform: translateX(-50%) translateY(0);
+            background-color: rgba(30, 41, 59, 0.98); /* Dark background from palette */
+            color: #E2E8F0; /* Light text from palette */
+            padding: 1rem 1.5rem; /* 16px 24px */
+            border-radius: 0.75rem; /* More rounded */
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 0 30px rgba(236, 72, 153, 0.4); /* Neon glow */
+            font-weight: 600;
+            font-size: 1.05rem;
+            min-width: 300px; /* Wider */
+            text-align: center;
+            border: 2px solid #3B82F6; /* Blue border */
+        }
+        .message-box.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Hero section specific background and animation */
+        .hero-section-bg {
+            background-image:
+                radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.3) 0%, transparent 50%), /* Blue glow */
+                radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.3) 0%, transparent 50%), /* Pink glow */
+                linear-gradient(to bottom right, #0F172A, #1A202C); /* Dark base gradient */
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-section-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><line x1="0" y1="0" x2="100" y2="100" stroke="%23334155" stroke-width="0.5"/><line x1="100" y1="0" x2="0" y2="100" stroke="%23334155" stroke-width="0.5"/><circle cx="50" cy="50" r="2" fill="%23334155"/></svg>') repeat; /* Grid with dots */
+            background-size: 100px 100px; /* Adjust grid size */
+            opacity: 0.25; /* More visible grid */
+            animation: move-grid 40s linear infinite, pulse-grid 10s infinite alternate;
+            z-index: 0;
+        }
+        .hero-section-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(59, 130, 246, 0.25), transparent, rgba(236, 72, 153, 0.25)); /* Stronger color pulse */
+            animation: pulse-colors 15s infinite alternate;
+            z-index: 1;
+        }
+
+        @keyframes move-grid {
+            0% { background-position: 0 0; }
+            100% { background-position: 100px 100px; }
+        }
+        @keyframes pulse-grid {
+            0% { opacity: 0.25; }
+            50% { opacity: 0.4; }
+            100% { opacity: 0.25; }
+        }
+        @keyframes pulse-colors {
+            0% { opacity: 0.25; }
+            50% { opacity: 0.6; } /* More intense pulse */
+            100% { opacity: 0.25; }
+        }
+
+        /* Gradient text for hero title with neon glow */
+        .gradient-text {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(to right, #38BDF8, #EC4899, #14B8A6, #A3E635); /* Blue, Pink, Teal, Lime */
+            text-shadow: 0 0 15px rgba(59, 130, 246, 0.8), 0 0 25px rgba(236, 72, 153, 0.8), 0 0 40px rgba(20, 184, 166, 0.6); /* Stronger Neon text glow */
+        }
+
+        /* Custom card border hover effect with animated glow */
+        .blog-post-card {
+            position: relative;
+            overflow: hidden;
+            background-image: linear-gradient(to bottom right, #1F2937, #111827); /* Dark gradient background */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none; /* No default border */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4); /* Initial subtle shadow */
+            border-radius: 0.75rem; /* Ensure consistent border-radius */
+        }
+        .blog-post-card::before {
+            content: '';
+            position: absolute;
+            inset: -4px; /* Larger inset for thicker glow */
+            border-radius: 0.75rem; /* Match card border-radius */
+            background: conic-gradient(from var(--angle), #38BDF8, #EC4899, #F97316, #14B8A6, #A78BFA, #38BDF8); /* Multi-color conic gradient */
+            animation: rotate-border 4s linear infinite;
+            z-index: -1;
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.4s ease-in-out;
+            filter: blur(8px); /* Stronger blur for more glow */
+        }
+        .blog-post-card:hover::before {
+            opacity: 1; /* Show on hover */
+        }
+        .blog-post-card::after { /* Inner glow/reflection effect */
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 0.75rem;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 70%); /* Stronger inner glow */
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .blog-post-card:hover::after {
+            opacity: 1;
+        }
+        .blog-post-card:hover {
+            transform: translateY(-18px); /* More pronounced lift */
+            box-shadow: 0 30px 80px rgba(0,0,0,0.7); /* Even stronger hover shadow */
+        }
+        @property --angle {
+            syntax: '<angle>';
+            inherits: false;
+            initial-value: 0deg;
+        }
+        @keyframes rotate-border {
+            to { --angle: 360deg; }
+        }
+
+        /* Gradient buttons with shimmer and stronger hover */
+        .btn-primary-gradient {
+            background-image: linear-gradient(to right, #3B82F6, #EC4899); /* Blue to Pink */
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 10;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .btn-primary-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent); /* Stronger shimmer */
+            transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); /* Smoother shimmer */
+            z-index: -1;
+        }
+        .btn-primary-gradient:hover::before {
+            left: 100%;
+        }
+        .btn-primary-gradient:hover {
+            transform: translateY(-8px) scale(1.1); /* More pronounced lift and scale */
+            box-shadow: 0 20px 45px rgba(0,0,0,0.5); /* Stronger hover shadow */
+        }
+
+        .btn-secondary-gradient {
+            background-image: linear-gradient(to right, #F97316, #14B8A6); /* Orange to Teal */
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 10;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .btn-secondary-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent); /* Stronger shimmer */
+            transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); /* Smoother shimmer */
+            z-index: -1;
+        }
+        .btn-secondary-gradient:hover::before {
+            left: 100%;
+        }
+        .btn-secondary-gradient:hover {
+            transform: translateY(-8px) scale(1.1); /* More pronounced lift and scale */
+            box-shadow: 0 20px 45px rgba(0,0,0,0.5); /* Stronger hover shadow */
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-gray-100 leading-relaxed antialiased">
+    <a id="top"></a> <!-- Ancla para el botón "Inicio" -->
+
+    <!-- Header -->
+    
+            </div>
+            <nav class="mb-4 md:mb-0">
+                <ul class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-6">
+                    <li><a href="#top" class="nav-link text-gray-300 text-lg font-semibold px-4 py-2 rounded-lg hover:bg-gray-700 hover:text-lime-400 transition-all duration-300 transform hover:-translate-y-1" data-target="top">Inicio</a></li>
+                    <li><a href="#featured-posts" class="nav-link text-gray-300 text-lg font-semibold px-4 py-2 rounded-lg hover:bg-gray-700 hover:text-lime-400 transition-all duration-300 transform hover:-translate-y-1" data-target="featured-posts">Artículos</a></li>
+                    <li><a href="#about-us" class="nav-link text-gray-300 text-lg font-semibold px-4 py-2 rounded-lg hover:bg-gray-700 hover:text-lime-400 transition-all duration-300 transform hover:-translate-y-1" data-target="about-us">Sobre Nosotros</a></li>
+                    <li><a href="#history" class="nav-link text-gray-300 text-lg font-semibold px-4 py-2 rounded-lg hover:bg-gray-700 hover:text-lime-400 transition-all duration-300 transform hover:-translate-y-1" data-target="history">Nuestra Historia</a></li>
+                    <li><a href="#contact" class="nav-link text-gray-300 text-lg font-semibold px-4 py-2 rounded-lg hover:bg-gray-700 hover:text-lime-400 transition-all duration-300 transform hover:-translate-y-1" data-target="contact">Contacto</a></li>
+                </ul>
+            </nav>
+            <div class="search-bar flex w-full md:w-auto rounded-lg overflow-hidden shadow-md border border-gray-700">
+                <input type="text" id="searchInput" placeholder="Buscar en el blog..." class="p-3 flex-grow outline-none text-gray-800 text-base bg-gray-200">
+                <button type="submit" id="searchButton" aria-label="Buscar" class="bg-blue-600 text-white p-3 hover:bg-blue-700 transition-colors duration-300">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Hero Section -->
+        <section class="hero-section-bg text-white text-center p-24 mb-12 rounded-xl shadow-2xl flex flex-col items-center justify-center min-h-[400px] relative z-0">
+            <h1 class="text-6xl font-oxanium font-extrabold mb-5 leading-tight drop-shadow-lg gradient-text relative z-10">Codifica el Futuro.<br>Desarrolla Sin Límites.</h1>
+            <p class="text-xl font-light mb-10 max-w-3xl opacity-90 text-gray-300 relative z-10">Tu guía definitiva para dominar lenguajes, frameworks y las mejores prácticas en ingeniería de software.</p>
+            <a href="#featured-posts" class="btn-primary-gradient text-white px-8 py-4 rounded-lg text-lg font-semibold shadow-xl relative z-10">Explorar Artículos</a>
+        </section>
+
+        <!-- Blog Posts and Sidebar -->
+        <section id="featured-posts" class="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-12">
+            <div class="lg:col-span-2"> <!-- Main content area for posts -->
+                <div class="post-grid grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Artículos se cargarán aquí dinámicamente con JavaScript -->
+                </div>
+                <button id="clearSearchButton" class="clear-search-btn bg-gray-700 text-gray-200 px-6 py-3 rounded-lg font-semibold mt-8 block mx-auto hover:bg-gray-600 transition-colors duration-300" style="display: none;">Mostrar Todos los Artículos</button>
+                <p id="noResultsMessage" class="text-center text-gray-400 italic font-semibold mt-8 text-lg" style="display: none;">No se encontraron artículos que coincidan con su búsqueda.</p>
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="sidebar bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-700 lg:col-span-1">
+                <div class="widget categories-widget mb-10">
+                    <h3 class="text-2xl font-bold text-lime-400 mb-6 pb-3 border-b-4 border-lime-600">Categorías Populares</h3>
+                    <ul>
+                        <li class="mb-2"><a href="#" class="category-filter text-gray-300 text-lg py-2 block hover:text-lime-400 hover:translate-x-2 transition-all duration-300" data-category="Desarrollo Web">Desarrollo Web</a></li>
+                        <li class="mb-2"><a href="#" class="category-filter text-gray-300 text-lg py-2 block hover:text-lime-400 hover:translate-x-2 transition-all duration-300" data-category="Backend">Backend</a></li>
+                        <li class="mb-2"><a href="#" class="category-filter text-gray-300 text-lg py-2 block hover:text-lime-400 hover:translate-x-2 transition-all duration-300" data-category="DevOps">DevOps</a></li>
+                        <li class="mb-2"><a href="#" class="category-filter text-gray-300 text-lg py-2 block hover:text-lime-400 hover:translate-x-2 transition-all duration-300" data-category="Inteligencia Artificial">Inteligencia Artificial</a></li>
+                        <li class="mb-2"><a href="#" class="category-filter text-gray-300 text-lg py-2 block hover:text-lime-400 hover:translate-x-2 transition-all duration-300" data-category="Mobile">Mobile</a></li>
+                        <li class="mb-2"><a href="#" class="category-filter text-gray-300 text-lg py-2 block hover:text-lime-400 hover:translate-x-2 transition-all duration-300" data-category="Bases de Datos">Bases de Datos</a></li>
+                        <li class="mb-2"><a href="#" class="category-filter text-gray-300 text-lg py-2 block hover:text-lime-400 hover:translate-x-2 transition-all duration-300" data-category="Calidad de Software">Calidad de Software</a></li>
+                    </ul>
+                </div>
+                <div class="widget newsletter-widget">
+                    <h3 class="text-2xl font-bold text-lime-400 mb-6 pb-3 border-b-4 border-lime-600">Suscríbete a nuestra Newsletter</h3>
+                    <form id="newsletterForm">
+                        <input type="email" id="emailInput" placeholder="Tu email..." required class="w-full p-3 mb-4 border border-gray-600 rounded-lg text-base bg-gray-700 text-gray-200 placeholder-gray-400 focus:ring-lime-500 focus:border-lime-500 outline-none">
+                        <button type="submit" class="btn-secondary-gradient text-white px-6 py-3 rounded-lg font-semibold w-full">Suscribirse</button>
+                    </form>
+                </div>
+            </aside>
+        </section>
+
+        <!-- About Us Section -->
+        <section id="about-us" class="bg-gray-800 p-12 rounded-xl shadow-2xl border border-gray-700 mb-12 text-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-700 opacity-20 rounded-xl z-0"></div>
+            <div class="relative z-10">
+                <h2 class="text-4xl font-oxanium font-extrabold mb-6 text-fuchsia-400 drop-shadow-lg">Sobre Nosotros: Nuestra Misión</h2>
+                <p class="text-lg text-gray-300 max-w-4xl mx-auto mb-8">
+                    En este blog, somos un equipo apasionado por la tecnología y el desarrollo de software. Nuestra misión es desmitificar el complejo mundo de la programación, ofreciendo contenido de alta calidad, tutoriales prácticos y análisis profundos para desarrolladores de todos los niveles. Creemos firmemente en el poder del conocimiento compartido para impulsar la innovación y el crecimiento profesional. Nos esforzamos por ser tu recurso de confianza en el vasto y emocionante universo del código.
+                </p>
+                <img src="https://placehold.co/800x450/1A202C/A78BFA?text=Team+Collaboration" alt="Imagen de Colaboración en Equipo" class="rounded-lg shadow-xl mx-auto mt-8 border-2 border-purple-500 transform transition-transform duration-300 hover:scale-105">
+            </div>
+        </section>
+
+        <!-- Our History Section -->
+        <section id="history" class="bg-gray-800 p-12 rounded-xl shadow-2xl border border-gray-700 mb-12 text-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-700 opacity-20 rounded-xl z-0"></div>
+            <div class="relative z-10">
+                <h2 class="text-4xl font-oxanium font-extrabold mb-6 text-blue-400 drop-shadow-lg">Nuestra Trayectoria: Un Viaje en el Código</h2>
+                <p class="text-lg text-gray-300 max-w-4xl mx-auto mb-8">
+                    Este proyecto nació de una simple idea: crear un espacio donde los desarrolladores pudieran aprender, crecer e inspirarse. Lo que comenzó como un pequeño esfuerzo personal, rápidamente evolucionó gracias al apoyo de una creciente comunidad de entusiastas del código. Hemos superado desafíos técnicos, celebrado cada hito de aprendizaje y nos hemos adaptado constantemente a las nuevas tecnologías y metodologías para ofrecerte siempre el contenido más relevante y útil. Nuestro viaje es un reflejo de la pasión por la innovación en el desarrollo de software.
+                </p>
+                <img src="https://placehold.co/800x450/1A202C/F97316?text=Development+Timeline" alt="Imagen de Línea de Tiempo de Desarrollo" class="rounded-lg shadow-xl mx-auto mt-8 border-2 border-orange-500 transform transition-transform duration-300 hover:scale-105">
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="bg-gray-800 p-12 rounded-xl shadow-2xl border border-gray-700 mb-12 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-700 opacity-20 rounded-xl z-0"></div>
+            <div class="relative z-10 text-center">
+                <h2 class="text-4xl font-oxanium font-extrabold mb-6 text-lime-400 drop-shadow-lg">Conéctate con Nosotros</h2>
+                <p class="text-lg text-gray-300 max-w-3xl mx-auto mb-8">
+                    ¿Tienes preguntas, sugerencias o simplemente quieres saludar? ¡Nos encantaría saber de ti! Completa el formulario a continuación y nos pondremos en contacto lo antes posible. Tu feedback es invaluable para seguir mejorando este espacio.
+                </p>
+                <form id="contactForm" class="max-w-xl mx-auto space-y-6">
+                    <div>
+                        <label for="contactName" class="block text-left text-gray-300 text-lg font-semibold mb-2">Nombre:</label>
+                        <input type="text" id="contactName" placeholder="Tu nombre completo" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-gray-200 placeholder-gray-400 focus:ring-lime-500 focus:border-lime-500 outline-none shadow-md">
+                    </div>
+                    <div>
+                        <label for="contactEmail" class="block text-left text-gray-300 text-lg font-semibold mb-2">Email:</label>
+                        <input type="email" id="contactEmail" placeholder="tu.email@ejemplo.com" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-gray-200 placeholder-gray-400 focus:ring-lime-500 focus:border-lime-500 outline-none shadow-md">
+                    </div>
+                    <div>
+                        <label for="contactMessage" class="block text-left text-gray-300 text-lg font-semibold mb-2">Mensaje:</label>
+                        <textarea id="contactMessage" rows="5" placeholder="Escribe tu mensaje aquí..." required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-gray-200 placeholder-gray-400 focus:ring-lime-500 focus:border-lime-500 outline-none shadow-md"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary-gradient text-white px-8 py-4 rounded-lg text-lg font-semibold shadow-xl w-full md:w-auto">Enviar Mensaje</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer id="footer" class="bg-gray-900 text-white py-10 mt-16 rounded-t-xl shadow-inner border-t border-gray-800">
+        <div class="container mx-auto flex flex-col md:flex-row items-center justify-between px-4">
+            <p class="text-sm opacity-80 mb-4 md:mb-0 text-gray-400">&copy; Nuestras redes sociales</p>
+            <div class="social-links flex space-x-6">
+                <a href="https://wa.me/message/NLLOQ7WM5G5XO1" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" class="text-gray-400 text-3xl hover:text-green-400 transform hover:-translate-y-1 hover:scale-110 transition-all duration-300"><i class="fab fa-whatsapp"></i></a>
+                <a href="https://www.facebook.com/profile.php?id=61557181671799" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="text-gray-400 text-3xl hover:text-blue-500 transform hover:-translate-y-1 hover:scale-110 transition-all duration-300"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://www.tiktok.com/@toribio_m?_t=ZM-8xwlOfRbOzg&_r=1" target="_blank" rel="noopener noreferrer" aria-label="TikTok" class="text-gray-400 text-3xl hover:text-purple-400 transform hover:-translate-y-1 hover:scale-110 transition-all duration-300"><i class="fab fa-tiktok"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // JavaScript code for blog functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const clearSearchButton = document.getElementById('clearSearchButton');
+            const newsletterForm = document.getElementById('newsletterForm');
+            const contactForm = document.getElementById('contactForm');
+            const postGrid = document.querySelector('.post-grid');
+            const noResultsMessage = document.getElementById('noResultsMessage');
+
+            // Article data (simulating an API or database)
+            const postData = [
+                {
+                    title: "Algoritmos Cifrados: Protegiendo tus Datos",
+                    image: "https://placehold.co/600x400/1F2937/60A5FA?text=Algoritmos+Cifrados",
+                    excerpt: "Explora los fundamentos de la criptografía y cómo los algoritmos de cifrado protegen la información sensible en tus aplicaciones.",
+                    link: "#",
+                    category: "Seguridad",
+                    date: "15 Jul 2025"
+                },
+                {
+                    title: "Cloud Computing para Desarrolladores: AWS, Azure y GCP",
+                    image: "https://placehold.co/600x400/1F2937/F97316?text=Cloud+Computing",
+                    excerpt: "Una guía práctica sobre los servicios de computación en la nube más populares y cómo aprovecharlos para desplegar tus aplicaciones escalables.",
+                    link: "#",
+                    category: "DevOps",
+                    date: "14 Jul 2025"
+                },
+                {
+                    title: "AI Neural Net: Construyendo Redes Neuronales desde Cero",
+                    image: "https://placehold.co/600x400/1F2937/A78BFA?text=AI+Neural+Net",
+                    excerpt: "Sumérgete en el mundo de las redes neuronales artificiales. Aprende sus principios, arquitecturas y cómo entrenarlas para resolver problemas complejos.",
+                    link: "#",
+                    category: "Inteligencia Artificial",
+                    date: "13 Jul 2025"
+                },
+                {
+                    title: "Blockchain Dev: Smart Contracts y DApps con Ethereum",
+                    image: "https://placehold.co/600x400/1F2937/EC4899?text=Blockchain+Dev",
+                    excerpt: "Descubre cómo desarrollar contratos inteligentes y aplicaciones descentralizadas (DApps) en la plataforma Ethereum. El futuro de la web 3.0.",
+                    link: "#",
+                    category: "Desarrollo Web",
+                    date: "12 Jul 2025"
+                },
+                {
+                    title: "Data Flow: Gestión Eficiente de Datos en Aplicaciones Modernas",
+                    image: "https://placehold.co/600x400/1F2937/FBBF24?text=Data+Flow",
+                    excerpt: "Optimiza el flujo de datos en tus sistemas. Desde la ingesta hasta el procesamiento y almacenamiento, domina las mejores prácticas para la gestión de datos.",
+                    link: "#",
+                    category: "Bases de Datos",
+                    date: "11 Jul 2025"
+                },
+                {
+                    title: "Cyber Security: Fundamentos para Desarrolladores Seguros",
+                    image: "https://placehold.co/600x400/1F2937/34D399?text=Cyber+Security",
+                    excerpt: "Aprende los principios básicos de la ciberseguridad y cómo aplicarlos en tu código para construir aplicaciones robustas y resistentes a ataques.",
+                    link: "#",
+                    category: "Seguridad",
+                    date: "10 Jul 2025"
+                },
+                {
+                    title: "DevOps Pipeline: Automatización Completa del Ciclo de Vida",
+                    image: "https://placehold.co/600x400/1F2937/EF4444?text=DevOps+Pipeline",
+                    excerpt: "Implementa pipelines de CI/CD eficientes. Desde la integración continua hasta el despliegue automático, agiliza tus procesos de desarrollo.",
+                    link: "#",
+                    category: "DevOps",
+                    date: "09 Jul 2025"
+                },
+                {
+                    title: "Mobile First: Diseño y Desarrollo para Experiencias Móviles",
+                    image: "https://placehold.co/600x400/1F2937/8B5CF6?text=Mobile+First",
+                    excerpt: "Adopta la filosofía 'Mobile First' para crear aplicaciones y sitios web que ofrezcan una experiencia de usuario excepcional en cualquier dispositivo.",
+                    link: "#",
+                    category: "Mobile",
+                    date: "08 Jul 2025"
+                },
+                {
+                    title: "Quantum Code: Primeros Pasos en la Programación Cuántica",
+                    image: "https://placehold.co/600x400/1F2937/38BDF8?text=Quantum+Code",
+                    excerpt: "Una introducción práctica a los conceptos de la programación cuántica y cómo empezar a escribir tus primeros algoritmos cuánticos.",
+                    link: "#",
+                    category: "Inteligencia Artificial",
+                    date: "07 Jul 2025"
+                },
+                {
+                    title: "API Design: Creando Interfaces Robustas y Amigables",
+                    image: "https://placehold.co/600x400/1F2937/EC4899?text=API+Design",
+                    excerpt: "Domina el arte del diseño de APIs RESTful y GraphQL. Aprende a crear interfaces que sean intuitivas, escalables y seguras para tus aplicaciones.",
+                    link: "#",
+                    category: "Backend",
+                    date: "06 Jul 2025"
+                },
+                {
+                    title: "Web Security: Protegiendo tu Aplicación de Amenazas Comunes",
+                    image: "https://placehold.co/600x400/1F2937/14B8A6?text=Web+Security",
+                    excerpt: "Identifica y mitiga las vulnerabilidades de seguridad más comunes en aplicaciones web. Una guía esencial para desarrolladores conscientes de la seguridad.",
+                    link: "#",
+                    category: "Seguridad",
+                    date: "05 Jul 2025"
+                },
+                {
+                    title: "Microfrontends: Arquitecturas Escalables para el Frontend",
+                    image: "https://placehold.co/600x400/1F2937/A3E635?text=Microfrontends",
+                    excerpt: "Explora el patrón de Microfrontends para construir aplicaciones web complejas como composiciones de características independientes y desplegables.",
+                    link: "#",
+                    category: "Desarrollo Web",
+                    date: "04 Jul 2025"
+                }
+            ];
+
+            // Function to display messages to the user (replaces alert())
+            function displayMessage(message) {
+                // Remove any existing message box to prevent overlaps
+                const existingMessageBox = document.querySelector('.message-box');
+                if (existingMessageBox) {
+                    existingMessageBox.remove();
+                }
+
+                const messageBox = document.createElement('div');
+                messageBox.classList.add('message-box'); // Add class for CSS
+                messageBox.textContent = message;
+                document.body.appendChild(messageBox);
+
+                // Show message with fade-in and slight upward movement
+                setTimeout(() => {
+                    messageBox.classList.add('show');
+                }, 10);
+
+                // Hide and remove message after 3 seconds
+                setTimeout(() => {
+                    messageBox.classList.remove('show');
+                    messageBox.addEventListener('transitionend', () => messageBox.remove(), { once: true });
+                }, 3000);
+            }
+
+            // Function to render articles in the DOM
+            function renderPosts(postsToRender) {
+                postGrid.innerHTML = ''; // Clear current grid
+                if (postsToRender.length === 0) {
+                    noResultsMessage.style.display = 'block'; // Show no results message
+                    clearSearchButton.style.display = 'block'; // Show clear search button
+                } else {
+                    noResultsMessage.style.display = 'none'; // Hide no results message
+                    postsToRender.forEach(post => {
+                        const article = document.createElement('article');
+                        article.classList.add('blog-post-card', 'rounded-xl', 'shadow-lg', 'overflow-hidden', 'transform', 'transition-all', 'duration-300', 'hover:scale-[1.02]', 'hover:shadow-xl', 'flex', 'flex-col'); // Tailwind classes for card styling
+                        article.innerHTML = `
+                            <img src="${post.image}" alt="${post.title}" onerror="this.onerror=null; this.src='https://placehold.co/600x400/1F2937/E2E8F0?text=Imagen+No+Disponible';" class="w-full h-56 object-cover border-b border-gray-700">
+                            <div class="p-6 flex flex-col flex-grow">
+                                <h3 class="text-2xl font-bold text-blue-400 mb-3 leading-tight">${post.title}</h3>
+                                <p class="text-gray-300 mb-4 text-base flex-grow">${post.excerpt}</p>
+                                <a href="${post.link}" class="read-more bg-orange-500 text-white text-center py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors duration-300 text-lg">Leer más</a>
+                                <div class="post-meta text-sm text-gray-400 mt-4 pt-3 border-t border-gray-700 flex justify-between">
+                                    <span>Categoría: ${post.category}</span>
+                                    <span>Fecha: ${post.date}</span>
+                                </div>
+                            </div>
+                        `;
+                        postGrid.appendChild(article);
+                    });
+                    // Hide clear search button if all articles are shown and search input is empty
+                    if (searchInput.value.trim() === "") {
+                         clearSearchButton.style.display = 'none';
+                    }
+                }
+            }
+
+            // Initial load of all articles
+            renderPosts(postData);
+
+            // 1. Search Functionality
+            function performSearch() {
+                const query = searchInput.value.trim().toLowerCase();
+                if (query === "") {
+                    renderPosts(postData); // If search is empty, show all
+                    clearSearchButton.style.display = 'none';
+                    return;
+                }
+
+                const filteredPosts = postData.filter(post =>
+                    post.title.toLowerCase().includes(query) ||
+                    post.excerpt.toLowerCase().includes(query) ||
+                    post.category.toLowerCase().includes(query)
+                );
+                renderPosts(filteredPosts);
+                clearSearchButton.style.display = 'block'; // Show clear search button
+            }
+
+            searchButton.addEventListener('click', performSearch);
+
+            searchInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    performSearch();
+                }
+            });
+
+            clearSearchButton.addEventListener('click', () => {
+                searchInput.value = ''; // Clear input
+                renderPosts(postData); // Show all articles
+                clearSearchButton.style.display = 'none'; // Hide button
+                noResultsMessage.style.display = 'none'; // Hide no results message
+            });
+
+            // 2. Newsletter Form Handling
+            if (newsletterForm) {
+                newsletterForm.addEventListener('submit', (event) => {
+                    event.preventDefault(); // Prevent page reload
+                    const emailInput = document.getElementById('emailInput');
+                    const email = emailInput.value.trim();
+
+                    if (email && email.includes('@') && email.includes('.')) { // Basic validation
+                        displayMessage(`¡Gracias por suscribirte con: ${email}!`);
+                        // Here you could send the email to a newsletter service (e.g., Mailchimp API)
+                        emailInput.value = ''; // Clear the field
+                    } else {
+                        displayMessage('Por favor, ingresa un email válido.');
+                    }
+                });
+            }
+
+            // 3. Contact Form Handling
+            if (contactForm) {
+                contactForm.addEventListener('submit', (event) => {
+                    event.preventDefault(); // Prevent page reload
+                    const name = document.getElementById('contactName').value.trim();
+                    const email = document.getElementById('contactEmail').value.trim();
+                    const message = document.getElementById('contactMessage').value.trim();
+
+                    if (name && email && email.includes('@') && email.includes('.') && message) {
+                        displayMessage(`¡Mensaje enviado! Gracias, ${name}. Nos pondremos en contacto pronto.`);
+                        // Here you would typically send this data to a backend service
+                        contactForm.reset(); // Clear the form
+                    } else {
+                        displayMessage('Por favor, completa todos los campos del formulario de contacto correctamente.');
+                    }
+                });
+            }
+
+            // 4. Navigation with Smooth Scroll
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const targetId = link.getAttribute('data-target');
+                    const targetElement = document.getElementById(targetId);
+
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                    } else if (targetId === 'top') {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                });
+            });
+
+            // 5. Smooth scroll for "Explore Articles" button
+            const exploreButton = document.querySelector('.hero-section-bg .btn-primary');
+            if (exploreButton) {
+                exploreButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const targetId = exploreButton.getAttribute('href');
+                    document.querySelector(targetId).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            }
+
+            // 6. Category filter in the sidebar
+            document.querySelectorAll('.category-filter').forEach(filterLink => {
+                filterLink.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const category = filterLink.getAttribute('data-category');
+                    searchInput.value = ''; // Clear search bar when filtering by category
+                    const filteredPosts = postData.filter(post => post.category === category);
+                    renderPosts(filteredPosts);
+                    clearSearchButton.style.display = 'block'; // Show clear search button
+                    document.getElementById('featured-posts').scrollIntoView({ behavior: 'smooth' }); // Scroll to posts section
+                });
+            });
+        });
+    </script>
+</body>
+</html>
